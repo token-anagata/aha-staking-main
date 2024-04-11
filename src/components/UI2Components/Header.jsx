@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { checkIfMetamaskIsInstalled, connectToMetamask, getConnectedWalletAddress } from '../../appCore/globalFunctions';
-
+//import { checkIfMetamaskIsInstalled, getConnectedWalletAddress } from '../../appCore/globalFunctions';
+import { useAccount } from 'wagmi'
 
 // const switchThemeMode = (setThemeMode) => {
 //   if (JSON.parse(localStorage.getItem("ahaThemeMode")) === 'dark') {
@@ -28,31 +28,28 @@ const setModeThemeOnStartUp = () => {
   return
 }
 
+const Header = ({ handleConnect, address }) => {
+  //const [hashedWallet, setHashedWallet] = useState('Connect to wallet')
+  // [themeMode, setThemeMode] = useState(JSON.parse(localStorage.getItem("ahaThemeMode")) || 'light'),
 
 
+  // useEffect(() => {
+  //   setModeThemeOnStartUp();
 
-const Header = () => {
-  
-  const [hashedWallet, setHashedWallet] = useState('Connect to wallet')
-        // [themeMode, setThemeMode] = useState(JSON.parse(localStorage.getItem("ahaThemeMode")) || 'light'),
+  //   checkIfMetamaskIsInstalled().then(installed => {
+  //     if (installed === true) {
+  //       return getConnectedWalletAddress().then(account => {
+  //         console.log(account)
+  //         if (typeof account !== 'boolean') {
+  //           setHashedWallet(`${account.slice(0, 6)}........${account.slice(account.length - 4, account.length)}`.toLowerCase());
+  //         }
+  //       })
+  //     }
 
-
-  useEffect(() => {
-    setModeThemeOnStartUp();
-
-    checkIfMetamaskIsInstalled().then(installed => {
-      if (installed === true) {
-        return getConnectedWalletAddress().then(account => {
-          if (typeof account !== 'boolean') {
-            setHashedWallet(`${account.slice(0, 6)}........${account.slice(account.length - 4, account.length)}`.toLowerCase());
-          }
-        })
-      }
-
-      // setOpenMetamaskWarning(true)
-      return;
-    })
-  }, [])
+  //     // setOpenMetamaskWarning(true)
+  //     return;
+  //   })
+  // }, [])
 
 
   return (
@@ -62,17 +59,9 @@ const Header = () => {
         <img src="./aha_logo.png" alt="Robinos Logo" className="h-16 py-2 -mt-3 -mb-1 sm:-my-8" />
       </a>
 
-      <button className="border-2 border-aha-green-dark dark:border-aha-green-lighter px-2 sm:py-1 rounded-xl text-sm" onClick={ () => {
-        connectToMetamask().then(metamaskData => {
-          if (typeof metamaskData === typeof true) {
-            return;
-          }
-
-          setHashedWallet(metamaskData.hashedAccount)
-        });
-      } }>
+      <button className="border-2 border-aha-green-dark dark:border-aha-green-lighter px-2 sm:py-1 rounded-xl text-sm" onClick={handleConnect} >
         <span className="flex items-center space-x-2">
-          <span>{hashedWallet}</span>
+          <span>{address ? `${address.slice(0, 6)}........${address.slice(address.length - 4, address.length)}`.toLowerCase() : 'Connect to wallet'}</span>
           <i className="fas fa-wallet"></i>
           {/* <i class='bx bx-xs bx-wallet'></i> */}
         </span>
