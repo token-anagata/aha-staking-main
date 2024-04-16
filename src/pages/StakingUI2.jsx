@@ -41,7 +41,7 @@ const StakingUI2 = () => {
       if (sales.length > 0) {
         setSaleActive(true);
       }
-
+      console.log(saleOn)
       // set end cycle date
       if (saleOn) {
         setSaleOn(saleOn);

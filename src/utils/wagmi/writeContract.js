@@ -55,6 +55,6 @@ export async function unStake(address) {
         console.log(result)
         return result
     } catch (error) {
-        console.log(error.data)
+        console.log(error)
     }
 }

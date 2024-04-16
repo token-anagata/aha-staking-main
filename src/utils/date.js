@@ -6,18 +6,22 @@ export function calculateRemainingTime(timestamp) {
     const currentTime = new Date().getTime();
 
     // Calculate remaining time in milliseconds
-    let remainingTime = milliseconds - currentTime;
+    const remainingTime = milliseconds - currentTime;
 
-    // Convert remaining time to positive value if negative
-    if (remainingTime < 0) {
-        remainingTime *= -1;
+    if(remainingTime < 1){
+        return {
+            days: '00',
+            hours: '00',
+            minutes: '00',
+            seconds: '00'
+        };
     }
 
     // Calculate remaining days, hours, minutes, and seconds
+    const seconds = Math.floor((remainingTime / 1000) % 60);
+    const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+    const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
     const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
     return {
         days: days || '00',
