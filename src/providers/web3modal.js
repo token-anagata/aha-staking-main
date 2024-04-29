@@ -9,7 +9,7 @@ createWeb3Modal({
   wagmiConfig: config,
   projectId: process.env.REACT_APP_WEB3MODAL_PROJECT_ID,
   enableAnalytics: true, 
-  enableOnramp: true 
+  enableOnramp: false 
 })
 
 export function Web3ModalProvider({ children }) {

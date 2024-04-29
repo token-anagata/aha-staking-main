@@ -5,20 +5,16 @@ import Header from "../components/UI2Components/Header";
 import { useAccount } from "wagmi";
 import { formattedAmountToAha } from "../utils/number";
 import FormStake from "../components/Stake/FormStake";
-import {
-  getHasUserUnstaked,
-  getIsSaleOn,
-  getSales,
-  getStakeFromCycle,
-} from "../utils/wagmi/readContract";
 import MainStake from "../components/Stake/MainStake";
 import UnstakeCycle from "../components/Stake/UnstakeCycle";
+import ListStake from "../components/Stake/ListStake";
+import { getListStakeByAddress } from "../utils/wagmi/watchEvent";
 
 const StakingUI2 = () => {
   const [stakedAmount, setStakedAmount] = useState(0);
   const [hasUnstaked, setHasUnstaked] = useState(0);
-  const [saleActive, setSaleActive] = useState(false);
-  const [saleOn, setSaleOn] = useState([])
+  const [listStake, setListStake] = useState([]);
+  const [loadingList, setLoadingList] = useState(true);
 
   const { open } = useWeb3Modal();
   const { address, isDisconnected } = useAccount();
@@ -34,55 +30,32 @@ const StakingUI2 = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const sales = await getSales();
-      const saleOn = await getIsSaleOn();
-
+      const list = await getListStakeByAddress(address)
       
-      if (sales.length > 0) {
-        setSaleActive(true);
-      }
-      console.log(saleOn)
-      // set end cycle date
-      if (saleOn) {
-        setSaleOn(saleOn);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const currentStaked = await getStakeFromCycle(address);
-      const hasUnstaked = await getHasUserUnstaked(address);
-
-      if (currentStaked > 0) {
-        setHasUnstaked(hasUnstaked);
-        setStakedAmount(formattedAmountToAha(currentStaked));
+      if(list){
+        setListStake(list)
+        setLoadingList(false)
       }
     };
 
     if (address) {
-      fetchData();
+      fetchData()
     } else {
       setStakedAmount(0);
+      setListStake([]);
+      setLoadingList(false)
     }
-  }, [address, isDisconnected]);
+  }, [address, isDisconnected, loadingList]);
 
   return (
     <>
-      <div className="sm:px-6">
-        <Header handleConnect={handleConnect} address={address} />
-      </div>
+      <Header handleConnect={handleConnect} address={address} />
 
-      <div className="grid w-full grid-cols-2 px-2 pt-8 pb-20 mx-auto gap-x-5 gap-y-10 max-w-7xl sm:px-10">
+      <main className="grid grid-cols-2 w-full max-w-screen-xl sm:px-8 px-4 pt-8 pb-20 mx-auto gap-x-5 gap-y-10 ">
         {/** Component main stake get information connected current user */}
         <MainStake
           address={address}
           isDisconnected={isDisconnected}
-          saleOn={saleOn}
-          saleActive={saleActive}
-          hasUnstaked={hasUnstaked}
           stakedAmount={stakedAmount}
         />
 
@@ -90,13 +63,21 @@ const StakingUI2 = () => {
         <FormStake
           address={address}
           isDisconnected={isDisconnected}
-          saleActive={saleActive}
-          hasUnstaked={hasUnstaked}
+          setLoadingList={setLoadingList}
+        />
+
+        {/** List user stake */}
+        <ListStake
+          address={address}
+          isDisconnected={isDisconnected}
+          listStake={listStake}
+          loadingList={loadingList}
+          setLoadingList={setLoadingList}
         />
 
         {/** Component Unstake cycle from connected current user */}
-        <UnstakeCycle address={address} hasUnstaked={hasUnstaked} />
-      </div>
+        <UnstakeCycle address={address} />
+      </main>
     </>
   );
 };

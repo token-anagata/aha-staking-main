@@ -1,72 +1,34 @@
-import React, { useState, useEffect } from 'react';
-//import { checkIfMetamaskIsInstalled, getConnectedWalletAddress } from '../../appCore/globalFunctions';
-import { useAccount } from 'wagmi'
-
-// const switchThemeMode = (setThemeMode) => {
-//   if (JSON.parse(localStorage.getItem("ahaThemeMode")) === 'dark') {
-//     localStorage.setItem("ahaThemeMode", JSON.stringify('light'));
-//     setThemeMode('light')
-//     document.documentElement.classList.remove('dark')
-//     return
-//   } else {
-//     localStorage.setItem("ahaThemeMode", JSON.stringify('dark'));
-//     setThemeMode('dark')
-//     document.documentElement.classList.add('dark')
-//     return
-//   }
-// }
-
-
-
-const setModeThemeOnStartUp = () => {
-  if (JSON.parse(localStorage.getItem("ahaThemeMode")) === 'dark' || (!('ahaThemeMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark')
-    return
-  }
-
-  document.documentElement.classList.remove('dark')
-  return
-}
+import LightSunIcon from '../../assets/svg/LightSunIcon';
+import NightMoonIcon from '../../assets/svg/NightMoonIcon';
+import { useDarkMode } from '../../context/DarkModeContext';
 
 const Header = ({ handleConnect, address }) => {
-  //const [hashedWallet, setHashedWallet] = useState('Connect to wallet')
-  // [themeMode, setThemeMode] = useState(JSON.parse(localStorage.getItem("ahaThemeMode")) || 'light'),
-
-
-  // useEffect(() => {
-  //   setModeThemeOnStartUp();
-
-  //   checkIfMetamaskIsInstalled().then(installed => {
-  //     if (installed === true) {
-  //       return getConnectedWalletAddress().then(account => {
-  //         console.log(account)
-  //         if (typeof account !== 'boolean') {
-  //           setHashedWallet(`${account.slice(0, 6)}........${account.slice(account.length - 4, account.length)}`.toLowerCase());
-  //         }
-  //       })
-  //     }
-
-  //     // setOpenMetamaskWarning(true)
-  //     return;
-  //   })
-  // }, [])
-
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   return (
-    <section className={`w-full bg-transparent pt-5 pb-3 px-3 sm:px-0 flex justify-between items-center`}>
+    <header className={`w-full bg-transparent sm:pt-5 py-3 sm:pb-3 sm:px-8 px-2 flex justify-between items-center border-b-2 dark:border-gray-600/50`}>
 
-      <a href="/" className="">
-        <img src="./aha_logo.png" alt="Robinos Logo" className="h-16 py-2 -mt-3 -mb-1 sm:-my-8" />
-      </a>
+      <nav>
+        <a href="/" className="">
+          <img src="./aha_logo.png" alt="Robinos Logo" className="w-28 sm:w-40 h-16 py-2 -mt-3 -mb-1 sm:-my-8" />
+        </a>
+      </nav>
 
-      <button className="border-2 border-aha-green-dark dark:border-aha-green-lighter px-2 sm:py-1 rounded-xl text-sm" onClick={handleConnect} >
-        <span className="flex items-center space-x-2">
-          <span>{address ? `${address.slice(0, 6)}........${address.slice(address.length - 4, address.length)}`.toLowerCase() : 'Connect to wallet'}</span>
-          <i className="fas fa-wallet"></i>
-          {/* <i class='bx bx-xs bx-wallet'></i> */}
-        </span>
-      </button>
-    </section>
+      <nav className="flex space-x-4">
+
+        <div onClick={toggleDarkMode}>
+          {darkMode ? <LightSunIcon addClassName="hover:bg-gray-700 rounded-lg p-1" /> : <NightMoonIcon addClassName="hover:bg-gray-200 rounded-lg p-1" />}
+        </div>
+
+        <button className="border-2 border-aha-green-dark dark:border-aha-green-lighter px-2 sm:py-1 rounded-xl text-sm" onClick={handleConnect} >
+          <span className="flex items-center space-x-2">
+            <span>{address ? `${address.slice(0, 6)}........${address.slice(address.length - 4, address.length)}`.toLowerCase() : 'Connect to wallet'}</span>
+            <i className="fas fa-wallet"></i>
+            {/* <i class='bx bx-xs bx-wallet'></i> */}
+          </span>
+        </button>
+      </nav>
+    </header>
   )
 }
 

@@ -1,6 +1,8 @@
+import { getMonthByPlanId } from "./stake";
+
 export function calculateRemainingTime(timestamp) {
     // Convert BigInt timestamp to milliseconds
-    const milliseconds = Number(timestamp) * Number(1000n);
+    const milliseconds = Number(timestamp);
 
     // Get current time in milliseconds
     const currentTime = new Date().getTime();
@@ -30,3 +32,43 @@ export function calculateRemainingTime(timestamp) {
         seconds: (seconds < 10 ? `0${seconds}` : seconds) || '00'
     };
 }
+
+export function getCurrentDate(date = new Date()){
+    return `${date.getDate()}.${date.getUTCMonth() + 1}.${date.getFullYear()}`
+}
+
+export function addMonthDate(months, currentDate){
+    currentDate.setMonth(currentDate.getMonth() + Number(months));
+
+    return currentDate
+}
+
+export function getEstimatedMonths(months, currentDate = new Date()) {
+    const addMonth = addMonthDate(months, currentDate)
+
+    return getCurrentDate(addMonth);
+}
+
+export function getStakeDate(date){
+    const stakeDate = new Date(date * 1000)
+
+    return getCurrentDate(stakeDate)
+}
+
+export function getStakeEstimatedMonths(planId, date){
+    const stakeDate = new Date(date * 1000)
+    const month = getMonthByPlanId(planId)
+    const addMonth = addMonthDate(month, stakeDate)
+
+    return getCurrentDate(addMonth)
+}
+
+
+export function getTimeEstimatedMonths(planId, currentDate){
+    const stakeDate = new Date(currentDate * 1000)
+    const month = getMonthByPlanId(planId)
+    const addMonth = addMonthDate(month, stakeDate)
+
+    return addMonth.getTime()
+}
+

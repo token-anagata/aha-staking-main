@@ -1,0 +1,3 @@
+
+export const AHA_TOKEN_ADDRESS = process.env.REACT_APP_TOKEN_CONTRACT
+export const AHA_STAKING_ADDRESS = process.env.REACT_APP_STAKE_CONTRACT

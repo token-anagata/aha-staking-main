@@ -1,63 +1,67 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "react-toastify"
 import SpinIcon from "../../assets/svg/SpinIcon"
 import classNames from "classnames"
-import { unStakeFromCurrentCycle } from "../../appCore/web3WriteFunctions"
 import { unStake } from "../../utils/wagmi/writeContract"
+import { useAccountStaked } from "../../context/AccountStakedContext"
 
-const UnstakeCycle = ({ address, hasUnstaked }) => {
-    const [previousCycleNumber, setPreviousCycleNumber] = useState('')
+const UnstakeCycle = ({ address }) => {
     const [loadingButton, setLoadingButton] = useState(false)
+    const [cycleNumber, setCycleNumber] = useState('');
+    const { currentStake, unclaimedStake } = useAccountStaked();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
+    const handleInputChange = (event) => {
+        setCycleNumber(event.target.value);
+    };
 
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData()
-
-    }, [])
-
-    const handleUnStake = (e) => {
+    const handleUnStake = async (e) => {
         e.preventDefault()
-        unStake(address)
-    }
+        try {
+            // loading button
+            setLoadingButton(true)
+            const result = await unStake(cycleNumber, address)
 
+            if (result) {
+                setLoadingButton(false)
+                toast.success('Unstake have been successfully')
+            }
+        } catch (e) {
+            console.log('unstake', e)
+            setLoadingButton(false)
+            toast.error("There was an error durring unstake, try again in moment")
+        }
+    }
     return (
-        <section className="col-span-2 px-2 py-6 space-y-8 bg-gray-300 shadow-xl sm:px-4 rounded-xl bg-opacity-60">
+        <section className="col-span-2 px-2 py-6 space-y-8 bg-gray-300 shadow-xl sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
             <div className="flex flex-col items-center sm:flex-row justify-evenly">
-                <section className="font-medium">
+                <div className="font-medium">
                     <h6 className="font-semibold"> Forgot to unstake from a previous cycle? We got you! </h6>
                     <p className="mt-1">
                         <span className="text-sm"> Unclaimed Cycle: </span>
-                        None
                         {
-                            // unclaimedCycle?.length ? unclaimedCycle.toString() : 'None'
+                            unclaimedStake !== 0 ? unclaimedStake : 'None'
                         }
                     </p>
-                </section>
+                </div>
 
-                <section className="flex items-center justify-between w-full max-w-sm py-1 pr-1 bg-gray-100 rounded">
-                    <input type="number" name='buyAmount' className="outline-none rounded p-1.5 bg-gray-100 text-black w-2/3 placeholder:text-gray-500" min={0} placeholder="Cycle Number" value={previousCycleNumber} onChange={(event) => {
-                        if (event.target.value > -1 || event.target.value === "") {
-                            setPreviousCycleNumber(event.target.value)
-                        }
-                    }} />
+                <div className="flex items-center justify-between w-full max-w-sm py-1 pr-1 bg-gray-100 dark:bg-gray-700 rounded">
+                    <input
+                        type="number"
+                        className="outline-none rounded p-1.5 bg-gray-100 dark:bg-gray-700 text-black dark:text-white w-2/3 placeholder:text-gray-500 placeholder:dark:text-gray-200"
+                        onChange={handleInputChange}
+                        value={cycleNumber}
+                        placeholder="Cycle Number"
+                    />
 
                     <button
                         className={classNames({
-                            'btn inline-flex btn rounded-sm py-1.5 px-6': true,
-                            'bg-opacity-50 pointer-events-none': !hasUnstaked,
+                            'btn inline-flex btn rounded-sm py-1.5 px-6 text-lg': true
                         })}
-                        disabled={loadingButton}
+                        disabled={loadingButton || currentStake === 0}
                         onClick={handleUnStake}>
-                        {loadingButton ? <><SpinIcon /> Processing</> : 'Clain'}
+                        {loadingButton ? <><SpinIcon /> Processing</> : 'Claim'}
                     </button>
-                </section>
+                </div>
             </div>
         </section>
     )

@@ -7,8 +7,10 @@ import {
     //polygon 
 } from "wagmi/chains";
 import { config } from '../../configurations/wagmi'
-import { AHA_STAKING_ABI, AHA_STAKING_ADDRESS, AHA_TOKEN_ABI, AHA_TOKEN_ADDRESS } from '../../ahaConfigVariables/ahaConfigVars';
 import { CURRENT_EVENT } from '.';
+import { AHA_STAKING_ADDRESS, AHA_TOKEN_ADDRESS } from "../../configurations/address";
+import { AHA_STAKING_ABI } from "../../abi/stake";
+import { AHA_TOKEN_ABI } from "../../abi/token";
 
 export async function getApproved(address) {
     const result = await readContract(config, {

@@ -7,9 +7,12 @@ import { writeContract } from '@wagmi/core'
 //     //polygon 
 // } from "wagmi/chains";
 import { config } from '../../configurations/wagmi'
-import { CURRENT_EVENT, DECIMALS } from '.';
-import { AHA_STAKING_ABI, AHA_STAKING_ADDRESS, AHA_TOKEN_ABI, AHA_TOKEN_ADDRESS } from '../../ahaConfigVariables/ahaConfigVars';
+import { AHA_STAKING_ADDRESS, AHA_TOKEN_ADDRESS } from "../../configurations/address";
+import { AHA_STAKING_ABI } from "../../abi/stake";
+import { AHA_TOKEN_ABI } from "../../abi/token";
+import { DECIMALS } from '.';
 
+/* global BigInt */
 export async function approve(address, amount) {
     const result = await writeContract(config, {
         abi: AHA_TOKEN_ABI,
@@ -17,7 +20,7 @@ export async function approve(address, amount) {
         functionName: 'approve',
         args: [
             AHA_STAKING_ADDRESS,
-            parseInt(amount) * (10 ** DECIMALS),
+            BigInt(amount) * DECIMALS,
         ],
         account: address
     })
@@ -25,14 +28,14 @@ export async function approve(address, amount) {
     return result
 }
 
-export async function stake(address, amount) {
+export async function stake(address, planId, amount) {
     const result = await writeContract(config, {
         abi: AHA_STAKING_ABI,
         address: AHA_STAKING_ADDRESS,
         functionName: 'stake',
         args: [
-            CURRENT_EVENT,
-            amount * (10 ** DECIMALS),
+            BigInt(planId),
+            BigInt(amount) * DECIMALS,
         ],
         account: address
     })
@@ -40,21 +43,17 @@ export async function stake(address, amount) {
     return result
 }
 
-export async function unStake(address) {
-    try {
-
+export async function unStake(planId, address) {
         const result = await writeContract(config, {
             abi: AHA_STAKING_ABI,
             address: AHA_STAKING_ADDRESS,
             functionName: 'unstake',
             args: [
-                CURRENT_EVENT
+                planId
             ],
             account: address,
         })
-        console.log(result)
+        
         return result
-    } catch (error) {
-        console.log(error)
-    }
+
 }

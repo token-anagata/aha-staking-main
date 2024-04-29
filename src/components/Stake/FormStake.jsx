@@ -2,15 +2,20 @@ import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import SpinIcon from "../../assets/svg/SpinIcon"
 import { formattedBalance } from "../../utils/wagmi"
-import { getApproved, getSales } from "../../utils/wagmi/readContract"
-import { approve, stake, unStake } from "../../utils/wagmi/writeContract"
+import { getApproved } from "../../utils/wagmi/readContract"
+import { approve, stake } from "../../utils/wagmi/writeContract"
 import { formattedAmountToAha } from "../../utils/number"
 import classNames from "classnames"
+import { getCurrentDate, getEstimatedMonths } from "../../utils/date"
+import { STAKE_MONTH, getAprPercentage, getCalculateApr, getPlanId } from "../../utils/stake"
 
-const FormStake = ({ address, isDisconnected, saleActive, hasUnstaked }) => {
-    const [amountToStake, setAmountToStake] = useState('')
-    const [walletBalance, setWalletBalance] = useState(0.00)
-    const [tokenApproved, setTokenApproved] = useState(false)
+const FormStake = ({ address, isDisconnected, setLoadingList}) => {
+    const [amountToStake, setAmountToStake] = useState(0)
+    const [walletBalance, setWalletBalance] = useState(0)
+    const [currentApr, setCurrentApr] = useState(-1)
+    const [planId, setPlanId] = useState(0)
+    const [apr, setApr] = useState(0)
+    const [estimatedApr, setEstimatedApr] = useState(0)
     const [loadingButton, setLoadingButton] = useState(false)
 
     useEffect(() => {
@@ -21,28 +26,67 @@ const FormStake = ({ address, isDisconnected, saleActive, hasUnstaked }) => {
 
                 if (approved) {
                     setAmountToStake(formattedAmountToAha(approved))
-                    setTokenApproved(true)
                 }
-
+                
                 setWalletBalance(balance)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
-        
-        if(address){
+
+        if (address) {
             fetchData()
-        }else{
+        } else {
             setWalletBalance(0)
         }
 
     }, [address, isDisconnected])
 
-    const handleApprove = async (e) => {
+    function calculateApr(duration, amount) {
+        const currentApr = getAprPercentage(Number(duration), Number(amount));
+        const calculateApr = getCalculateApr(Number(duration), Number(amount));
+        const plan = getPlanId(Number(duration), Number(amount));
+
+        setPlanId(plan)
+        setApr(currentApr)
+        setEstimatedApr(calculateApr)
+    }
+
+    const handleChangeAmount = (e) => {
+        if (e.target.value > -1 || e.target.value === "") {
+            calculateApr(currentApr, Number(e.target.value));
+            setAmountToStake(e.target.value)
+        }
+    }
+
+    const handleInputAmount = (e) => {
+        switch (e.target.dataset.key) {
+            case '1':
+                setAmountToStake((walletBalance * 0.75).toFixed(0))
+                break;
+            case '2':
+                setAmountToStake((walletBalance * 0.5).toFixed(0))
+                break;
+            case '3':
+                setAmountToStake((walletBalance * 0.25).toFixed(0))
+                break;
+
+            default:
+                setAmountToStake(walletBalance)
+                break;
+        }
+    }
+
+    const handleStake = async (e) => {
         e.preventDefault()
-        //ensure amount more than 1000 AHA
-        if (amountToStake < 1000) {
-            toast.warning("Amount is required & more than equal 1000")
+        //ensure amount more than 20,000 AHA
+        if (amountToStake < 20000) {
+            toast.warning("Amount is required & minimum stake is more than equal 20000")
+            return false
+        }
+
+        if (planId < 1) {
+            toast.warning("Please choose a month first")
             return false
         }
 
@@ -50,31 +94,20 @@ const FormStake = ({ address, isDisconnected, saleActive, hasUnstaked }) => {
             // loading button
             setLoadingButton(true)
             // ask to pemitted for approve their balance
-            const result = await approve(address, amountToStake)
-            // ensure their wallet confirm 
-            if (result) {
-                setLoadingButton(false)
-                setTokenApproved(true)
-                toast.success('Approve was successfull')
-            }
-        } catch (e) {
-            console.log('approve', e)
-            setLoadingButton(false)
-            toast.error("There was an error durring approve, try again in moment")
-        }
-    }
-
-    const handleStake = async (e) => {
-        e.preventDefault()
-        try {
-            // loading button
-            setLoadingButton(true)
-            // Ask to permitted for move their funds to contract address
-            const result = await stake(address, amountToStake)
-
-            if (result) {
-                setLoadingButton(false)
-                toast.success('Your funds have been successfully staked')
+            const resultApprove = await approve(address, amountToStake)
+            
+            if(resultApprove){
+                toast.success('Approve was successfull')   
+                // Ask to permitted for move their funds to contract address
+                const result = await stake(address, planId, amountToStake)
+                
+                if (result) {
+                    // update list 
+                    setLoadingList(true)
+                    setLoadingButton(false)
+                    
+                    toast.success('Your funds have been successfully staked')
+                }
             }
         } catch (e) {
             console.log('stake', e)
@@ -83,79 +116,100 @@ const FormStake = ({ address, isDisconnected, saleActive, hasUnstaked }) => {
         }
     }
 
-    const handleUnStake = async (e) => {
-        e.preventDefault()
-        try {
-            // loading button
-            setLoadingButton(true)
-            const result = await unStake(address)
-
-            if (result) {
-                setLoadingButton(false)
-                toast.success('Unstake have been successfully')
-            }
-        } catch (e) {
-            console.log('unstake', e)
-            setLoadingButton(false)
-            toast.error("There was an error durring unstake, try again in moment")
-        }
+    const handleDuration = (e) => {
+        setCurrentApr(e.target.dataset.key)
+        calculateApr(e.target.dataset.key, amountToStake)
     }
 
     return (
-        <section className="col-span-2 px-2 py-6 space-y-8 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-xl bg-opacity-60">
-            <section className="space-y-4">
-                <p className="font-medium">
-                    <span className="text-sm font-semibold"> Wallet Balance: </span>
-                    AHA {walletBalance}
+        <section className="col-span-2 grid sm:grid-rows-1 px-2 py-2 space-y-3 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
+            <div className="flex flex-col">
+                <p className="font-medium text-lg text-right py-4">
+                    <span className="font-semibold"> Wallet Balance: </span>
+                    {walletBalance} AHA
                 </p>
 
-                <div className="flex items-center justify-between w-full max-w-sm py-1 pr-1 mx-auto bg-gray-100 rounded">
-                    <input type="number" name='buyAmount' className="outline-none rounded p-1.5 bg-gray-100 text-black w-2/3 placeholder:text-gray-500" min={0} placeholder="Amount" value={amountToStake} onChange={(e) => {
-                        if (e.target.value > -1 || e.target.value === "") {
-                            setAmountToStake(e.target.value)
-                        }
-                    }} />
+                <div className="flex justify-between w-full max-w-sm text-md font-semibold text-aha-green-light">
+                    {
+                        ['Max', '75%', '50%', '25%'].map((v, k) => (
+                            <span
+                                key={k}
+                                className="underline cursor-pointer hover:no-underline text-lg"
+                                data-key={k}
+                                onClick={handleInputAmount}
+                            >
+                                {v}
+                            </span>
+                        ))
+                    }
+                </div>
 
+                <div className="flex rounded-lg shadow-sm">
+                    <input
+                        type="number"
+                        name='buyAmount'
+                        className="pe-11 block w-2/3 outline-none rounded-l-sm py-2 px-2 text-xl bg-gray-100 dark:bg-gray-700 text-black dark:text-white placeholder:text-gray-500 placeholder:dark:text-gray-200"
+                        min={20000} 
+                        placeholder="Amount"
+                        value={amountToStake}
+                        onChange={handleChangeAmount}
+                    />
                     <button
                         className={classNames({
-                            'btn inline-flex items-center btn py-1 px-2 w-1/3 text-base': true,
-                            'bg-opacity-50 pointer-events-none': !saleActive,
+                            'btn items-center min-w-fit w-1/3 btn py-1 px-2 gap-x-2 text-xl text-center rounded-r-sm': true,
+                            //'bg-opacity-50 pointer-events-none': !saleActive,
+                            'inline-flex': loadingButton
                         })}
                         disabled={loadingButton}
-                        onClick={!tokenApproved ? handleApprove : handleStake}>
-                        {loadingButton ? <><SpinIcon /> Processing</> : (!tokenApproved ? 'Approve' : 'Stake')}
+                        onClick={handleStake}>
+                        {loadingButton ? <><SpinIcon /> Processing</> : 'Approve & Stake'}
                     </button>
 
+
                 </div>
+            </div>
 
-                <div className="flex items-center justify-between w-full max-w-xs mx-auto text-sm font-semibold text-aha-green-light">
-                    <span className="underline cursor-pointer hover:no-underline" onClick={() => {
-                        setAmountToStake(walletBalance)
-                    }}>Max</span>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-0 gap-y-2 rounded-lg shadow-sm">
+                {
+                    STAKE_MONTH.map((v, k) => (
+                        <button
+                            key={k}
+                            type="button"
+                            className={classNames({
+                                "w-full px-2 py-4 items-center text-xl sm:text-sm first:rounded-s-lg rounded-sm text-white": true,
+                                "border-b-0 border-r-2 last:border-r-0 focus:border-0 font-medium dark:border-gray-200": true,
+                                "bg-aha-green-light hover:bg-aha-green-lighter": k !== Number(currentApr),
+                                "bg-aha-green-dark": k === Number(currentApr)
+                            })}
+                            data-key={k}
+                            onClick={handleDuration}
+                        >
+                            {v} Month
+                        </button>
+                    ))
+                }
+            </div>
 
-                    <span className="underline cursor-pointer hover:no-underline" onClick={() => {
-                        setAmountToStake((walletBalance * 0.5).toFixed(0))
-                    }}>50%</span>
-
-                    <span className="underline cursor-pointer hover:no-underline" onClick={() => {
-                        setAmountToStake((walletBalance * 0.3).toFixed(0))
-                    }}>30%</span>
+            <div className="flex flex-col justify-between p-2 gap-2">
+                <h4 className="font-bold text-xl px-2 py-2">Summary</h4>
+                <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
+                    <div>Stacking Date</div>
+                    <div className="text-right">{getCurrentDate()} - {currentApr < 0 ? getCurrentDate() : getEstimatedMonths(STAKE_MONTH[currentApr])}</div>
                 </div>
-            </section>
-
-            <section className="flex items-center justify-between font-medium">
-                <p className="font-bold"> Unstake from most recent cycle </p>
-
-                <button
-                    className={classNames({
-                        'btn inline-flex btn rounded-sm py-1.5 px-6': true,
-                        //'bg-opacity-50 pointer-events-none': !hasUnstaked,
-                    })}
-                    //disabled={loadingButton}
-                    onClick={handleUnStake}>
-                    {loadingButton ? <><SpinIcon /> Processing</> : 'UnStake'}
-                </button>
-            </section>
+                <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
+                    <div>Estimated annual yield</div>
+                    <div className="text-right">{(estimatedApr || 0).toFixed(2)}</div>
+                </div>
+                <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
+                    <div>APR</div>
+                    <div className="text-right">{(apr * 100) || 0}%</div>
+                </div>
+                <p className="text-md self-end">Not working?&nbsp;
+                    <a href="https://t.me/AnagataGlobal" className="font-bold text-aha-green-lighter hover:text-[#22c55e]">
+                        Contact support
+                    </a>
+                </p>
+            </div>
         </section>
     )
 }
