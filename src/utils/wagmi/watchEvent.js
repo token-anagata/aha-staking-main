@@ -16,8 +16,8 @@ export async function getListStakeByAddress(address) {
         abi: AHA_STAKING_ABI,
         eventName: 'Staked',
         args: {
-            from: address,
-            to: AHA_STAKING_ADDRESS
+            user: address,
+            //to: AHA_STAKING_ADDRESS
         },
         fromBlock: 'earliest',
         toBlock: blockNumber
@@ -30,6 +30,6 @@ export async function getListStakeByAddress(address) {
 
         logs[i].timestamp = Number(block.timestamp)
     }
-    
+
     return logs
 }
