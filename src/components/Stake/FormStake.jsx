@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import SpinIcon from "../../assets/svg/SpinIcon"
-import { formattedBalance } from "../../utils/wagmi"
+import { SUCCESS_STATUS, formattedBalance, getTransactionConfirmed } from "../../utils/wagmi"
 import { getApproved } from "../../utils/wagmi/readContract"
 import { approve, stake } from "../../utils/wagmi/writeContract"
 import { formattedAmountToAha } from "../../utils/number"
@@ -9,7 +9,7 @@ import classNames from "classnames"
 import { getCurrentDate, getEstimatedMonths } from "../../utils/date"
 import { STAKE_MONTH, getAprPercentage, getCalculateApr, getPlanId } from "../../utils/stake"
 
-const FormStake = ({ address, isDisconnected, setLoadingList}) => {
+const FormStake = ({ address, isDisconnected, setLoadingList }) => {
     const [amountToStake, setAmountToStake] = useState(0)
     const [walletBalance, setWalletBalance] = useState(0)
     const [currentApr, setCurrentApr] = useState(-1)
@@ -27,7 +27,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList}) => {
                 if (approved) {
                     setAmountToStake(formattedAmountToAha(approved))
                 }
-                
+
                 setWalletBalance(balance)
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -94,19 +94,24 @@ const FormStake = ({ address, isDisconnected, setLoadingList}) => {
             // loading button
             setLoadingButton(true)
             // ask to pemitted for approve their balance
-            const resultApprove = await approve(address, amountToStake)
-            
-            if(resultApprove){
-                toast.success('Approve was successfull')   
-                // Ask to permitted for move their funds to contract address
-                const result = await stake(address, planId, amountToStake)
-                
-                if (result) {
-                    // update list 
-                    setLoadingList(true)
-                    setLoadingButton(false)
-                    
-                    toast.success('Your funds have been successfully staked')
+            const hashApprove = await approve(address, amountToStake)
+
+            if (hashApprove) {
+                toast.success('Approve was successfull')
+                // check transaction has confirmed
+                const receipt = await getTransactionConfirmed(hashApprove);
+
+                if (receipt.status === SUCCESS_STATUS) {
+                    // Ask to permitted for move their funds to contract address
+                    const result = await stake(address, planId, amountToStake)
+
+                    if (result) {
+                        // update list 
+                        setLoadingList(true)
+                        setLoadingButton(false)
+
+                        toast.success('Your funds have been successfully staked')
+                    }
                 }
             }
         } catch (e) {
@@ -149,7 +154,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList}) => {
                         type="number"
                         name='buyAmount'
                         className="pe-11 block w-2/3 outline-none rounded-l-sm py-2 px-2 text-xl bg-gray-100 dark:bg-gray-700 text-black dark:text-white placeholder:text-gray-500 placeholder:dark:text-gray-200"
-                        min={20000} 
+                        min={20000}
                         placeholder="Amount"
                         value={amountToStake}
                         onChange={handleChangeAmount}
