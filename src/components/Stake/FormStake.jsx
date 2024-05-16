@@ -4,7 +4,7 @@ import SpinIcon from "../../assets/svg/SpinIcon"
 import { SUCCESS_STATUS, formattedBalance, getTransactionConfirmed } from "../../utils/wagmi"
 import { getApproved } from "../../utils/wagmi/readContract"
 import { approve, stake } from "../../utils/wagmi/writeContract"
-import { formattedAmountToAha } from "../../utils/number"
+import { formatNumber, formattedAmountToAha } from "../../utils/number"
 import classNames from "classnames"
 import { getCurrentDate, getEstimatedMonths } from "../../utils/date"
 import { STAKE_MONTH, getAprPercentage, getCalculateApr, getPlanId } from "../../utils/stake"
@@ -53,11 +53,24 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
     }
 
     const handleChangeAmount = (e) => {
-        if (e.target.value > -1 || e.target.value === "") {
-            calculateApr(currentApr, Number(e.target.value));
-            setAmountToStake(e.target.value)
+        const { value } = e.target;
+
+        if (value > -1 || value === "") {
+            if (/^\d*$/.test(value)) {
+                calculateApr(currentApr, Number(value));
+                setAmountToStake(value)
+            }
         }
     }
+
+    const handleKeyDownAmount = (e) => {
+        const controlKeys = [
+            'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'
+        ];
+        if (!controlKeys.includes(e.key) && !/^\d$/.test(e.key)) {
+            e.preventDefault();
+        }
+    };
 
     const handleInputAmount = (e) => {
         switch (e.target.dataset.key) {
@@ -131,7 +144,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
             <div className="flex flex-col">
                 <p className="font-medium text-lg text-right py-4">
                     <span className="font-semibold"> Wallet Balance: </span>
-                    {walletBalance} AHA
+                    {formatNumber(Number(walletBalance), 0, 3)} AHA
                 </p>
 
                 <div className="flex justify-between w-full max-w-sm text-md font-semibold text-aha-green-light">
@@ -158,6 +171,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
                         placeholder="Amount"
                         value={amountToStake}
                         onChange={handleChangeAmount}
+                        onKeyDown={handleKeyDownAmount}
                     />
                     <button
                         className={classNames({

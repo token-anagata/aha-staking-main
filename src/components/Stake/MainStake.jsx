@@ -5,6 +5,7 @@ import classNames from "classnames"
 import SpinIcon from "../../assets/svg/SpinIcon"
 import { calculateRemainingTime } from "../../utils/date"
 import { useAccountStaked } from "../../context/AccountStakedContext"
+import { formatNumber } from "../../utils/number"
 
 const MainStake = ({ address, isDisconnected }) => {
     const [timeLeft, setTimeLeft] = useState({
@@ -54,7 +55,7 @@ const MainStake = ({ address, isDisconnected }) => {
                         Amount Staked:
                     </div>
                     <div className="col-span-1 text-right">
-                        {amountStaked} AHA
+                        {formatNumber(Number(amountStaked), 2, 2)} AHA
                     </div>
                 </div>
                 <div className="grid grid-cols-2">
@@ -62,7 +63,7 @@ const MainStake = ({ address, isDisconnected }) => {
                         Reward:
                     </div>
                     <div className="col-span-1 text-right">
-                        {rewardStaked} AHA
+                        {formatNumber(Number(rewardStaked), 2, 2)} AHA
                     </div>
                 </div>
                 <div className="grid grid-cols-2">

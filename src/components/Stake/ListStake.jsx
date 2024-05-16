@@ -8,6 +8,7 @@ import { DECIMALS } from "../../utils/wagmi"
 import { getAprPercentage, getCalculateApr, getCalculateMonthByPlanId, getMonthByPlanId } from "../../utils/stake"
 import { useAccountStaked } from "../../context/AccountStakedContext"
 import { LINK_EXPLORER } from "../../configurations/common"
+import { formatNumber } from "../../utils/number"
 
 const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconnected }) => {
     const [loadingButton, setLoadingButton] = useState(false)
@@ -98,7 +99,7 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconne
                             </div>
                             <div className="space-y-0.5 text-center">
                                 <p className="text-lg text-slate-500 font-semibold">
-                                    {Number(v.args.amount / DECIMALS)} AHA
+                                    {formatNumber(Number(v.args.amount / DECIMALS), 0, 2) } AHA
                                 </p>
                             </div>
                             <a
@@ -111,7 +112,7 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconne
                         <div className="flex flex-col text-center sm:text-right pl-4 sm:space-y-2 ">
                             <p className="font-bold text-xl">Cycle Number <span className="text-aha-green-lighter">{Number(v.args.planId)}</span></p>
                             <p className="font-semibold text-xl text-aha-green-light">
-                                {getCalculateApr(getCalculateMonthByPlanId(v.args.planId), Number(v.args.amount / DECIMALS))}&nbsp;
+                                {formatNumber(getCalculateApr(getCalculateMonthByPlanId(v.args.planId), Number(v.args.amount / DECIMALS)), 0, 2)}&nbsp;
                                 <i className="text-gray-500">({getAprPercentage(getCalculateMonthByPlanId(v.args.planId), Number(v.args.amount / DECIMALS)) * 100}%)</i>
                             </p>
                             <button
