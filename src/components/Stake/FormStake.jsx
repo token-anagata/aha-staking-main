@@ -4,13 +4,13 @@ import SpinIcon from "../../assets/svg/SpinIcon"
 import { SUCCESS_STATUS, formattedBalance, getTransactionConfirmed } from "../../utils/wagmi"
 import { getApproved } from "../../utils/wagmi/readContract"
 import { approve, stake } from "../../utils/wagmi/writeContract"
-import { formatNumber, formattedAmountToAha } from "../../utils/number"
+import { formatInputNumber, formatNumber, formattedAmountToAha, formattedStringToNumber } from "../../utils/number"
 import classNames from "classnames"
 import { getCurrentDate, getEstimatedMonths } from "../../utils/date"
 import { STAKE_MONTH, getAprPercentage, getCalculateApr, getPlanId } from "../../utils/stake"
 
 const FormStake = ({ address, isDisconnected, setLoadingList }) => {
-    const [amountToStake, setAmountToStake] = useState(0)
+    const [amountToStake, setAmountToStake] = useState('')
     const [walletBalance, setWalletBalance] = useState(0)
     const [currentApr, setCurrentApr] = useState(-1)
     const [planId, setPlanId] = useState(0)
@@ -42,26 +42,36 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
     }, [address, isDisconnected])
 
-    function calculateApr(duration, amount) {
-        const currentApr = getAprPercentage(Number(duration), Number(amount));
-        const calculateApr = getCalculateApr(Number(duration), Number(amount));
-        const plan = getPlanId(Number(duration), Number(amount));
+    useEffect(() => {
+        const numericDuration = Number(currentApr)
+        const numericAmount = formattedStringToNumber(amountToStake)
 
-        setPlanId(plan)
-        setApr(currentApr)
-        setEstimatedApr(calculateApr)
-    }
+        console.log(numericAmount, numericDuration)
+        if (numericDuration >= 0 && numericAmount > 0) {
+            const currentAprPercentage = getAprPercentage(numericDuration, numericAmount);
+            const calculateApr = getCalculateApr(numericDuration, numericAmount);
+            const plan = getPlanId(numericDuration, numericAmount);
+
+            setPlanId(plan)
+            setApr(currentAprPercentage)
+            setEstimatedApr(calculateApr)
+        }
+    }, [currentApr, amountToStake]);
 
     const handleChangeAmount = (e) => {
         const { value } = e.target;
+        // Remove commas for validation
+        const numericValue = value.replace(/,/g, '')
 
-        if (value > -1 || value === "") {
-            if (/^\d*$/.test(value)) {
-                calculateApr(currentApr, Number(value));
-                setAmountToStake(value)
+        if (/^\d*$/.test(numericValue)) {
+            const numberValue = parseInt(numericValue, 10)
+            if (!isNaN(numberValue) || value === '') {
+                const formatAmount = formatInputNumber(numericValue)
+
+                setAmountToStake(formatAmount)
             }
         }
-    }
+    };
 
     const handleKeyDownAmount = (e) => {
         const controlKeys = [
@@ -93,7 +103,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
     const handleStake = async (e) => {
         e.preventDefault()
         //ensure amount more than 20,000 AHA
-        if (amountToStake < 20000) {
+        if (Number(amountToStake) < 20000) {
             toast.warning("Amount is required & minimum stake is more than equal 20000")
             return false
         }
@@ -107,7 +117,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
             // loading button
             setLoadingButton(true)
             // ask to pemitted for approve their balance
-            const hashApprove = await approve(address, amountToStake)
+            const hashApprove = await approve(address, Number(amountToStake))
 
             if (hashApprove) {
                 toast.success('Approve was successfull')
@@ -116,7 +126,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
                 if (receipt.status === SUCCESS_STATUS) {
                     // Ask to permitted for move their funds to contract address
-                    const result = await stake(address, planId, amountToStake)
+                    const result = await stake(address, planId, Number(amountToStake))
 
                     if (result) {
                         // update list 
@@ -134,9 +144,8 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
         }
     }
 
-    const handleDuration = (e) => {
-        setCurrentApr(e.target.dataset.key)
-        calculateApr(e.target.dataset.key, amountToStake)
+    const handleDuration = (key) => {
+        setCurrentApr(key)
     }
 
     return (
@@ -164,10 +173,8 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
                 <div className="flex rounded-lg shadow-sm">
                     <input
-                        type="number"
                         name='buyAmount'
                         className="pe-11 block w-2/3 outline-none rounded-l-sm py-2 px-2 text-xl bg-gray-100 dark:bg-gray-700 text-black dark:text-white placeholder:text-gray-500 placeholder:dark:text-gray-200"
-                        min={20000}
                         placeholder="Amount"
                         value={amountToStake}
                         onChange={handleChangeAmount}
@@ -200,8 +207,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
                                 "bg-aha-green-light hover:bg-aha-green-lighter": k !== Number(currentApr),
                                 "bg-aha-green-dark": k === Number(currentApr)
                             })}
-                            data-key={k}
-                            onClick={handleDuration}
+                            onClick={(e) => handleDuration(k)}
                         >
                             {v} Month
                         </button>
@@ -217,7 +223,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
                 </div>
                 <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
                     <div>Estimated annual yield</div>
-                    <div className="text-right">{(estimatedApr || 0).toFixed(2)}</div>
+                    <div className="text-right">{formatNumber((estimatedApr || 0), 0, 2)}</div>
                 </div>
                 <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
                     <div>APR</div>
