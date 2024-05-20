@@ -46,7 +46,6 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
         const numericDuration = Number(currentApr)
         const numericAmount = formattedStringToNumber(amountToStake)
 
-        console.log(numericAmount, numericDuration)
         if (numericDuration >= 0 && numericAmount > 0) {
             const currentAprPercentage = getAprPercentage(numericDuration, numericAmount);
             const calculateApr = getCalculateApr(numericDuration, numericAmount);
@@ -102,8 +101,9 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
     const handleStake = async (e) => {
         e.preventDefault()
+        const numericAmount = formattedStringToNumber(amountToStake)
         //ensure amount more than 20,000 AHA
-        if (Number(amountToStake) < 20000) {
+        if (Number(numericAmount) < 20000) {
             toast.warning("Amount is required & minimum stake is more than equal 20000")
             return false
         }
@@ -117,7 +117,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
             // loading button
             setLoadingButton(true)
             // ask to pemitted for approve their balance
-            const hashApprove = await approve(address, Number(amountToStake))
+            const hashApprove = await approve(address, Number(numericAmount))
 
             if (hashApprove) {
                 toast.success('Approve was successfull')
@@ -126,7 +126,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
                 if (receipt.status === SUCCESS_STATUS) {
                     // Ask to permitted for move their funds to contract address
-                    const result = await stake(address, planId, Number(amountToStake))
+                    const result = await stake(address, planId, Number(numericAmount))
 
                     if (result) {
                         // update list 
