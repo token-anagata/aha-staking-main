@@ -8,8 +8,9 @@ import { formatInputNumber, formatNumber, formattedAmountToAha, formattedStringT
 import classNames from "classnames"
 import { getCurrentDate, getEstimatedMonths } from "../../utils/date"
 import { STAKE_MONTH, getAprPercentage, getCalculateApr, getPlanId } from "../../utils/stake"
+import ReloadIcon from "../../assets/svg/ReloadIcon"
 
-const FormStake = ({ address, isDisconnected, setLoadingList }) => {
+const FormStake = ({ address, isDisconnected, loadingList, setLoadingList }) => {
     const [amountToStake, setAmountToStake] = useState('')
     const [walletBalance, setWalletBalance] = useState(0)
     const [currentApr, setCurrentApr] = useState(-1)
@@ -17,6 +18,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
     const [apr, setApr] = useState(0)
     const [estimatedApr, setEstimatedApr] = useState(0)
     const [loadingButton, setLoadingButton] = useState(false)
+    const [loadingBalance, setLoadingBalance] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,6 +31,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
                 }
 
                 setWalletBalance(balance)
+                setLoadingBalance(false)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -36,11 +39,13 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
 
         if (address) {
             fetchData()
-        } else {
+        }
+        
+        if(loadingBalance || typeof(address) === 'undefined'){
             setWalletBalance(0)
         }
 
-    }, [address, isDisconnected])
+    }, [address, isDisconnected, loadingBalance])
 
     useEffect(() => {
         const numericDuration = Number(currentApr)
@@ -152,6 +157,19 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
         <section className="col-span-2 grid sm:grid-rows-1 px-2 py-2 space-y-3 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
             <div className="flex flex-col">
                 <p className="font-medium text-lg text-right py-4">
+                    {address && (
+                        <button
+                            className={classNames({
+                                'btn inline-flex btn rounded-full p-1': true,
+                            })}
+                            onClick={() => setLoadingBalance(true)}
+                        >
+                            <ReloadIcon addClassName={classNames({
+                                'font-bold w-4 h-4': true,
+                                'animate-spin': loadingBalance
+                            })} />
+                        </button>
+                    )}
                     <span className="font-semibold"> Wallet Balance: </span>
                     {formatNumber(Number(walletBalance), 0, 3)} AHA
                 </p>

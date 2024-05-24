@@ -61,12 +61,13 @@ const StakingUI2 = () => {
           stakedAmount={stakedAmount}
           loadingList={loadingList}
           setLoadingList={setLoadingList}
-        />
+          />
 
         {/** Component form stake connected current user */}
         <FormStake
           address={address}
           isDisconnected={isDisconnected}
+          loadingList={loadingList}
           setLoadingList={setLoadingList}
         />
 

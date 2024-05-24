@@ -49,7 +49,7 @@ const MainStake = ({ address, loadingList, setLoadingList }) => {
     }
 
     return (
-        <section className="col-span-2 px-2 py-6 space-y-6 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
+        <section className="col-span-2 px-2 py-6 space-y-8 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
             <div className="space-y-2 font-semibold text-justify">
                 <div className="grid grid-cols-2">
                     <div className="col-span-1">
@@ -140,7 +140,7 @@ const MainStake = ({ address, loadingList, setLoadingList }) => {
                         onClick={() => setLoadingList(true)}
                     >
                         <ReloadIcon addClassName={classNames({
-                            'font-bold w-10 h-10': true,
+                            'font-medium w-12 h-12': true,
                             'animate-spin': loadingList
                         })} />
                     </button>
