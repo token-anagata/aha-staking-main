@@ -218,7 +218,7 @@ const FormStake = ({ address, isDisconnected, setLoadingList }) => {
             <div className="flex flex-col justify-between p-2 gap-2">
                 <h4 className="font-bold text-xl px-2 py-2">Summary</h4>
                 <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">
-                    <div>Stacking Date</div>
+                    <div>Staking Date</div>
                     <div className="text-right">{getCurrentDate()} - {currentApr < 0 ? getCurrentDate() : getEstimatedMonths(STAKE_MONTH[currentApr])}</div>
                 </div>
                 <div className="grid grid-cols-2 border-b-2 border-gray-400 text-lg px-2">

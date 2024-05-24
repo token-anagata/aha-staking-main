@@ -6,15 +6,16 @@ import SpinIcon from "../../assets/svg/SpinIcon"
 import { calculateRemainingTime } from "../../utils/date"
 import { useAccountStaked } from "../../context/AccountStakedContext"
 import { formatNumber } from "../../utils/number"
+import ReloadIcon from "../../assets/svg/ReloadIcon"
 
-const MainStake = ({ address, isDisconnected }) => {
+const MainStake = ({ address, loadingList, setLoadingList }) => {
     const [timeLeft, setTimeLeft] = useState({
         days: '00', hours: '00',
         minutes: '00', seconds: '00'
     })
     const [loadingButton, setLoadingButton] = useState(false)
     const { amountStaked, rewardStaked, totalStaked, lastStaked, currentStake } = useAccountStaked();
-    
+
     useEffect(() => {
         // Execute timer every 1 seconds 
         const intervalId = setInterval(() => {
@@ -48,7 +49,7 @@ const MainStake = ({ address, isDisconnected }) => {
     }
 
     return (
-        <section className="col-span-2 px-2 py-6 space-y-8 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
+        <section className="col-span-2 px-2 py-6 space-y-6 bg-gray-300 shadow-xl sm:col-span-1 sm:px-4 rounded-sm bg-opacity-60 dark:bg-opacity-30">
             <div className="space-y-2 font-semibold text-justify">
                 <div className="grid grid-cols-2">
                     <div className="col-span-1">
@@ -121,13 +122,29 @@ const MainStake = ({ address, isDisconnected }) => {
 
                 <button
                     className={classNames({
-                        'btn inline-flex btn rounded-sm py-1.5 px-6 text-xl': true
+                        'btn inline-flex btn rounded-sm py-1.5 px-6 text-2xl break-after-column': true
                     })}
                     disabled={loadingButton || currentStake === 0}
                     onClick={() => handleUnStake(currentStake)}>
                     {loadingButton ? <><SpinIcon /> Processing</> : 'Unstake'}
                 </button>
 
+            </div>
+
+            <div className="flex justify-center">
+                {address && (
+                    <button
+                        className={classNames({
+                            'btn inline-flex btn rounded-full p-4': true,
+                        })}
+                        onClick={() => setLoadingList(true)}
+                    >
+                        <ReloadIcon addClassName={classNames({
+                            'font-bold w-10 h-10': true,
+                            'animate-spin': loadingList
+                        })} />
+                    </button>
+                )}
             </div>
         </section>
     )

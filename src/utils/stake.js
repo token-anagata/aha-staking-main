@@ -82,6 +82,7 @@ export function getCalculateMonthByPlanId(planId){
     const plan = Number(planId);
     
     if(plan <= 6) return plan - 1
+    if(plan % 6 === 0) return 5
 
     return (plan % 6) - 1
 }

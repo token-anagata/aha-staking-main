@@ -3,7 +3,6 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import Header from "../components/UI2Components/Header";
 import { useAccount } from "wagmi";
-import { formattedAmountToAha } from "../utils/number";
 import FormStake from "../components/Stake/FormStake";
 import MainStake from "../components/Stake/MainStake";
 import UnstakeCycle from "../components/Stake/UnstakeCycle";
@@ -12,12 +11,11 @@ import { getListStakeByAddress } from "../utils/wagmi/watchEvent";
 
 const StakingUI2 = () => {
   const [stakedAmount, setStakedAmount] = useState(0);
-  const [hasUnstaked, setHasUnstaked] = useState(0);
   const [listStake, setListStake] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
 
   const { open } = useWeb3Modal();
-  const { address, isDisconnected } = useAccount();
+  const { address, isConnected, isDisconnected } = useAccount();
 
   const handleConnect = (e) => {
     e.preventDefault();
@@ -41,11 +39,15 @@ const StakingUI2 = () => {
     if (address) {
       fetchData()
     } else {
-      setStakedAmount(0);
-      setListStake([]);
+      setStakedAmount(0)
+      setListStake([])
       setLoadingList(false)
     }
   }, [address, isDisconnected, loadingList]);
+
+  useEffect(() => {
+    setLoadingList(true)
+  }, [isConnected])
 
   return (
     <>
@@ -57,6 +59,8 @@ const StakingUI2 = () => {
           address={address}
           isDisconnected={isDisconnected}
           stakedAmount={stakedAmount}
+          loadingList={loadingList}
+          setLoadingList={setLoadingList}
         />
 
         {/** Component form stake connected current user */}

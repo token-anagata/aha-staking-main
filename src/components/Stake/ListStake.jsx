@@ -10,7 +10,7 @@ import { useAccountStaked } from "../../context/AccountStakedContext"
 import { LINK_EXPLORER } from "../../configurations/common"
 import { formatNumber } from "../../utils/number"
 
-const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconnected }) => {
+const ListStake = ({ listStake, loadingList, setLoadingList, address }) => {
     const [loadingButton, setLoadingButton] = useState(false)
     const {
         updateRewardStaked,
@@ -39,7 +39,7 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconne
                 lastStaked = estMonth;
             }
 
-            if(estMonth > (new Date).getTime()){
+            if(estMonth > (new Date()).getTime()){
                 unclaimed++;
             }
 
@@ -90,7 +90,7 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconne
                         <div className="text-center space-y-2 sm:text-left">
                             <div className="flex flex-col sm:flex-row space-y-0.5 sm:space-y-0 space-x-0 sm:space-x-2 text-center justify-center">
                                 <p className="text-xl text-black dark:text-gray-200 font-semibold">
-                                    Stacking Date
+                                    Staking Date
                                 </p>
                                 <p className="text-xl text-black dark:text-gray-200 font-semibold">
                                     {getStakeDate(v.timestamp)} - {getStakeEstimatedMonths(v.args.planId, v.timestamp)}
@@ -105,6 +105,7 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address, isDisconne
                             <a
                                 href={`${LINK_EXPLORER}/tx/${v.transactionHash}`}
                                 target="_blank"
+                                rel="noopener"
                                 className="block px-4 py-1 text-md text-white text-ellipsis overflow-hidden font-semibold rounded-full bg-aha-green-light hover:text-white hover:bg-aha-green-dark hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">
                                 {v.transactionHash}
                             </a>

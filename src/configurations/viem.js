@@ -1,7 +1,9 @@
 import { createPublicClient, http } from 'viem'
-import { bscTestnet } from 'viem/chains'
- 
+import { getChain, getPublicRpc } from './chain'
+
+const publicRpc = getPublicRpc()
+
 export const publicClient = createPublicClient({ 
-  chain: bscTestnet, 
-  transport: http('https://endpoints.omniatech.io/v1/bsc/testnet/public'), 
+  chain: getChain(), 
+  transport: http(publicRpc), 
 }) 

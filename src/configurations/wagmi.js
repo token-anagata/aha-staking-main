@@ -1,13 +1,6 @@
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { http } from '@wagmi/core'
-
-import { 
-    //arbitrum, 
-    // bsc, 
-    bscTestnet, 
-    //mainnet, 
-    //polygon 
-} from "wagmi/chains";
+import { getChain } from "./chain"
 
 const metadata = {
     name: 'Web3Modal',
@@ -16,14 +9,14 @@ const metadata = {
     icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
 const projectId = process.env.REACT_APP_WEB3MODAL_PROJECT_ID;
-const chains = [bscTestnet];
+const chain = getChain();
 
 export const config = defaultWagmiConfig({
-  chains,
+  chains: [chain],
   projectId,
   metadata,
   transports: {
-    [bscTestnet.id]: http(),
+    [chain.id]: http(),
   },
   //...wagmiOptions 
 })
