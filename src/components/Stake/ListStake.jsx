@@ -119,9 +119,9 @@ const ListStake = ({ listStake, loadingList, setLoadingList, address }) => {
                             <button
                                 className={classNames({
                                     'btn btn rounded-sm py-1.5 px-6': true,
-                                    'disabled:bg-aha-green-dark': getStakeEstimatedMonths(v.args.planId, v.timestamp) !== getCurrentDate()
+                                    'disabled:bg-aha-green-dark': getTimeEstimatedMonths(v.args.planId, v.timestamp) >= (new Date()).getTime()
                                 })}
-                                disabled={loadingButton || getStakeEstimatedMonths(v.args.planId, v.timestamp) !== getCurrentDate()}
+                                disabled={loadingButton || getTimeEstimatedMonths(v.args.planId, v.timestamp) >= (new Date()).getTime()}
                                 onClick={() => handleUnStake(v.args.planId)}>
                                 {loadingButton ? <><SpinIcon /> Processing</> : 'Unstake'}
                             </button>

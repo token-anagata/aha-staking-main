@@ -135,12 +135,12 @@ const MainStake = ({ address, loadingList, setLoadingList }) => {
                 {address && (
                     <button
                         className={classNames({
-                            'btn inline-flex btn rounded-full p-4': true,
+                            'btn inline-flex btn rounded-full p-2': true,
                         })}
                         onClick={() => setLoadingList(true)}
                     >
                         <ReloadIcon addClassName={classNames({
-                            'font-medium w-12 h-12': true,
+                            'font-medium w-8 h-8': true,
                             'animate-spin': loadingList
                         })} />
                     </button>

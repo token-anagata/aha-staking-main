@@ -25,9 +25,9 @@ export async function getListStakeByAddress(address) {
 
     for (let i = 0; i < logs.length; i++) {
         const block = await publicClient.getBlock({
-            blockHash: logs[0].blockHash
+            blockHash: logs[i].blockHash
         })
-
+        
         logs[i].timestamp = Number(block.timestamp)
     }
 
