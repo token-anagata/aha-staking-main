@@ -1,8 +1,10 @@
-import { bsc, bscTestnet } from "viem/chains";
+import { bsc, bscTestnet, polygonAmoy } from "viem/chains";
 import { CHAIN_NETWORK } from "./common";
 
 export function getChain(){
-    if(CHAIN_NETWORK === 'bsc'){
+    if(CHAIN_NETWORK === 'amoy'){
+        return polygonAmoy
+    }else if(CHAIN_NETWORK === 'bsc'){
         return bsc
     }else{
         return bscTestnet
@@ -10,7 +12,9 @@ export function getChain(){
 }
 
 export function getPublicRpc(){
-    if(CHAIN_NETWORK === 'bsc'){
+    if(CHAIN_NETWORK === 'amoy'){
+        return 'https://rpc-amoy.polygon.technology'
+    }else if(CHAIN_NETWORK === 'bsc'){
         return 'https://binance.llamarpc.com'
     }else{
         return 'https://endpoints.omniatech.io/v1/bsc/testnet/public'

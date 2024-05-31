@@ -119,6 +119,7 @@ const FormStake = ({ address, isDisconnected, loadingList, setLoadingList }) => 
         }
 
         try {
+            const duration = STAKE_MONTH
             // loading button
             setLoadingButton(true)
             // ask to pemitted for approve their balance

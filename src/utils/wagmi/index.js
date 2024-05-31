@@ -31,6 +31,8 @@ export async function formattedBalance(address) {
         token: AHA_TOKEN_ADDRESS
     })
 
+    console.log(balance)
+
     return balance.formatted
 }
 
